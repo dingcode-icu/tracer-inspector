@@ -16,6 +16,13 @@
       "shell": {
         "all": false,
         "open": true
+      }, 
+      "http": {
+        "all": true,
+        "request": true,
+        "scope": [
+          "http://*:6086/json"
+        ]
       }
     },
     "bundle": {
@@ -36,17 +43,21 @@
     "updater": {
       "active": false
     },
-    "windows": [
+    
+    "windows": [  
       {
         "fullscreen": false,
         "resizable": true,
         "title": "tracer-inspector",
-        "width": 400,
+        "width": 480,
+        "minWidth": 480,
+        "minHeight": 800,
         "height": 800,
         "center": true,
-        "visible":false
+        "visible":true
       }, 
       {
+        "visible":false, 
         "width": 550,
         "center": true, 
         "focus":true, 
