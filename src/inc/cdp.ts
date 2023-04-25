@@ -1,5 +1,6 @@
 import { http, invoke } from "@tauri-apps/api";
 import WebSocketAsPromised from "websocket-as-promised";
+import { NodeProperty } from "../model/node_property";
 
 enum EConType {
     Rust,
@@ -9,8 +10,10 @@ enum EConType {
 interface CdpResponse {
     id: number,
     method: string,
-    params: CdpConsoleParams
+    params: CdpConsoleParams,
+    result: any
 }
+
 
 interface CdpConsoleParams {
     type: string,
@@ -51,6 +54,17 @@ export interface CdpEvent<T> {
     out: T
 }
 
+export interface CdpResult<T> {
+    tag: string,
+    out: T[]
+}
+
+export interface CdpResultNodeTree {
+    label: string,
+    key: string,
+    children: CdpResultNodeTree[]
+}
+
 interface DebuggerTarget {
     description: string,
     devtoolsFrontendUrl: string,
@@ -87,12 +101,21 @@ export default class CdpDebugger {
         this._ws = null
     }
 
+    public _onResultNodeProp: ((evt: NodeProperty) => void | undefined) | undefined;
+    public set onResultNodeProp(method: (evt: NodeProperty) => void) {
+        this._onResultNodeProp = method
+    }
+
     public _onConsole: ((evt: CdpEvent<CdpEventConsole>) => void | undefined) | undefined;
     public set onConsole(method: (evt: CdpEvent<CdpEventConsole>) => void) {
         this._onConsole = method
     }
 
-    // public _onResult: ((evt: CdpEvent<>))
+    public _onResultNodeTree: ((evt: CdpResultNodeTree[]) => void | undefined) | undefined;
+    public set onResultNodeTree(method: (evt: CdpResultNodeTree[]) => void) {
+        this._onResultNodeTree = method
+    }
+
 
     //js special 
     private async get_tabs(index: number, host: string, port: number = 6086) {
@@ -142,10 +165,9 @@ export default class CdpDebugger {
         return ret
     }
 
-    public async filter_hookmethod(msg: string) {
-        const origin_map: CdpResponse = JSON.parse(msg)
-        // this._cur_msgid = origin_map.
-        switch (origin_map.method) {
+
+    private handle_method_resp(resp: CdpResponse) {
+        switch (resp.method) {
             case "Runtime.consoleAPICalled":
                 let evt: CdpEvent<CdpEventConsole> = {
                     event: "",
@@ -154,22 +176,62 @@ export default class CdpDebugger {
                     }
                 }
                 evt.event = "cdp-console"
-                evt.out.msg = this.get_console_out(origin_map.params)
+                evt.out.msg = this.get_console_out(resp.params)
                 if (this._onConsole) {
                     this._onConsole(evt)
                 }
                 break;
 
             default:
-                console.warn(`no handler for ${origin_map.method}`)
+                console.warn(`no handler for ${resp.method}`)
                 break;
         }
+    }
+
+    private handle_result_resp(resp: CdpResponse) {
+        const data = resp.result.result
+        if (!data) return
+        if (data.type == "object") {
+            let root = data.value;
+            if (!root || !root["tag"]) return 
+            let func_tag = root["tag"]
+            switch (func_tag) {
+                case "NOTE_TREE":
+                    this._onResultNodeTree!([
+                        {
+                            label: root["label"],
+                            key: root["key"],
+                            children: root["children"]
+                        }
+                    ])
+                    break;
+                case "NODE_PROPERTY":
+                    this._onResultNodeProp!(root["val"])
+                    break;
+                default:
+                    console.warn(`no handler for tag ${func_tag}`)
+                    break;
+            }
+            return
+        }
+        console.warn(`no handler for type: ${data.type}`)
+    }
+
+    public async filter_handle_resp(msg: string) {
+        const origin_map: CdpResponse = JSON.parse(msg)
+        if (origin_map.method) {
+            this.handle_method_resp(origin_map)
+            return
+        }
+        this.handle_result_resp(origin_map)
     }
 
     private async connect_js(host: string, port: number = 6086): Promise<EConnectStatu> {
         console.log(`conncet_js get debugger address:${host}...`)
         let tab_0 = await this.get_tabs(0, host, port)
-        console.log(tab_0, "-->>tab_0")
+            .catch((err) => {
+                return undefined
+            })
         if (!tab_0) {
             return EConnectStatu.Idle
         }
@@ -180,9 +242,10 @@ export default class CdpDebugger {
         }
         console.log(`addr is:${addr}...`)
         let ws = new WebSocketAsPromised(addr!)
+        console.log("async ?")
         this._ws = ws
         ws.onMessage.addListener(data => {
-            this.filter_hookmethod(data)
+            this.filter_handle_resp(data)
         })
         ws.onResponse.addListener(data => console.log(data, "-->>>onResponse"))
         ws.onClose.addListener(_ => {
@@ -194,9 +257,9 @@ export default class CdpDebugger {
             .then(() => {
                 this._status = EConnectStatu.Connected
                 this.req_debugger("Runtime.enable", {})
-                this.req_debugger("Debugger.enable", {"maxScriptsCacheSize":10000000})
-                this.req_debugger("Debugger.setPauseOnExceptions", {"state":"none"})
-                this.req_debugger("Debugger.setAsyncCallStackDepth", {"maxDepth":32})
+                // this.req_debugger("Debugger.enable", {"maxScriptsCacheSize":10000000})
+                // this.req_debugger("Debugger.setPauseOnExceptions", {"state":"none"})
+                // this.req_debugger("Debugger.setAsyncCallStackDepth", {"maxDepth":32})
                 console.log("connect suc!")
             }
             )
@@ -218,19 +281,18 @@ export default class CdpDebugger {
         this._ws?.send(JSON.stringify({ "id": this._cur_msgid, "method": method, "params": params }))
     }
 
-    public evalute_js(js_chunk: string) {
+    public evalute_js(js_chunk: string, group: string = "console") {
         this.req_debugger("Runtime.evaluate", {
             expression: js_chunk,
-            objectGroup: "console",
+            objectGroup: group,
             includeCommandLineAPI: true,
             silent: false,
-            returnByValue: false,
+            returnByValue: true,
             generatePreview: true,
             userGesture: true,
             awaitPromise: false,
             replMode: true,
-            allowUnsafeEvalBlockedByCSP: false,
-            contextId: 1
+            allowUnsafeEvalBlockedByCSP: false
         }
         )
     }

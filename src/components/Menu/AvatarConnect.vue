@@ -3,7 +3,6 @@
         <el-form-item label="Host:">
             <el-input v-model="debugHostForm.host" placeholder="127.0.0.1" />
         </el-form-item>
-
         <el-form-item label="Port:" s>
             <el-input v-model="debugHostForm.port" placeholder="6089" />
         </el-form-item>
@@ -11,7 +10,7 @@
         <template #footer>
             <span class="dialog-footer">
                 <el-button ref="btnConDialog" type="primary" :loading="connectStatu == EConnectStatu.Connecting"
-                    @click="onConectDebugger">
+                    @click="onConnectDebugger">
                     {{ connectStatu == EConnectStatu.Connecting ? "Connecting" : "Connect" }}
                 </el-button>
             </span>
@@ -27,10 +26,9 @@
 </template>
 
 <script setup lang="ts">
+import { ElAlert, ElMessage, ElMessageBox } from 'element-plus';
 import { onMounted, reactive, ref } from 'vue';
 import CdpDebugger, { EConnectStatu } from '../../inc/cdp';
-import { XtermCompoment } from '../../inc/xterm';
-import Xterm from '../Xterm.vue';
 
 const avatarEmit = defineEmits(["on-connected-statu"])
 
@@ -43,7 +41,6 @@ const connectIco = ref("ui-svg/dis-connect.png")
 const isConDialogVisible = ref(true)
 const isCdpConnecting = ref(false)
 
-const debugHost = ref("")
 const debugHostForm = reactive({
     host: "10.250.33.31",
     port: 6086
@@ -67,7 +64,7 @@ const updateConDesc = () => {
 
 }
 
-const onConectDebugger = async () => {
+const onConnectDebugger = async () => {
     //start 
     connectStatu.value = EConnectStatu.Connecting
     updateConDesc()
@@ -76,8 +73,16 @@ const onConectDebugger = async () => {
     connectStatu.value = new_state
     updateConDesc()
     //check result
-    isConDialogVisible.value = false
     avatarEmit('on-connected-statu', new_state)
+    if (new_state != EConnectStatu.Connected){
+        ElMessage({
+            message: 'Connected to v8 debugger failed!',
+            type: 'warning',
+        })
+        return 
+    }
+    isConDialogVisible.value = false
+    
 }
 
 const onSetDebughost = () => {

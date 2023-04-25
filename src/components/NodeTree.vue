@@ -1,21 +1,20 @@
 <template>
     <div>
-        <el-row id="treenode_menu">
-            <el-text class="mx-1">
-                <el-icon>
-                    <ElementPlus />
-                </el-icon>
-                节点树
-            </el-text>
-        </el-row>
-        <el-row>
-            <el-col :span="12" id="panel_tree">
-                <el-tree v-if="treeData.length > 0" :data="treeData" :props="defaultProps" @node-click="onSelect" />
-                <el-empty v-else description="No Data">
-                    <el-button type="primary">Fresh</el-button>
+        <el-row id="row-functional">
+            <el-col :span="6" id="panel-tree">
+                <el-input v-if="treeDataHash.length > 0" v-model="treeFilterText" placeholder="Search..." :suffix-icon="Search"/>
+                <el-tree ref="treeElemenet" v-if="treeData.length > 0" :data="treeData" :props="defaultProps" node-key="key"
+                    :default-expanded-keys="elTreeExpandlist" @node-click="onTreeSelect" @node-expand="onTreeExpand"
+                    @node-collapse="onTreeCollapse" 
+                    :filter-node-method="onTreeFilter"
+                    />
+                <el-empty v-else :description="treeDataDesc">
                 </el-empty>
             </el-col>
-            <el-col :span="12" id="panel_nodeinfo">
+            <el-col :span="6" id="panel-nodeprop">
+                <NodeProp :nodeProps="treeSelNodeProperty"></NodeProp>
+            </el-col>
+            <el-col :span="12" id="panel-debugeval">
             </el-col>
         </el-row>
     </div>
@@ -23,128 +22,162 @@
 
 <script setup lang="ts">
 import { ref, watch } from "vue";
-import { invoke } from "@tauri-apps/api/tauri";
-import { ElementPlus } from '@element-plus/icons-vue'
-import CdpDebugger, { EConnectStatu } from "../inc/cdp";
+import NodeProp from "./NodeProp.vue"
+import CdpDebugger, { CdpResultNodeTree, EConnectStatu } from "../inc/cdp";
+import { NodeProperty } from "../model/node_property";
+import { Search } from "@element-plus/icons-vue";
 
 const globalProp = defineProps(["connectStatu"])
 
-const treeData = ref([
-    // {
-    //   label: 'parent 1',
-    //   key: '0-0',
-    //   children: [
-    //     {
-    //       label: 'parent 1-0',
-    //       key: '0-0-0',
-    //       children: [
-    //         { label: 'leaf', key: '0-0-0-0' },
-    //         {
-    //           key: '0-0-0-1',
-    //         },
-    //         { label: 'leaf', key: '0-0-0-2' },
-    //       ],
-    //     },
-    //     {
-    //       label: 'parent 1-1',
-    //       key: '0-0-1',
-    //       children: [{ label: 'leaf', key: '0-0-1-0' }],
-    //     },
-    //     {
-    //       label: 'parent 1-2',
-    //       key: '0-0-2',
-    //       children: [
-    //         { label: 'leaf 1', key: '0-0-2-0' },
-    //         {
-    //           label: 'leaf 2',
-    //           key: '0-0-2-1',
-    //         },
-    //       ],
-    //     },
-    //   ],
-    // },
-    // {
-    //   label: 'parent 2',
-    //   key: '0-1',
-    //   children: [
-    //     {
-    //       label: 'parent 2-0',
-    //       key: '0-1-0',
-    //       children: [
-    //         { label: 'leaf', key: '0-1-0-0' },
-    //         { label: 'leaf', key: '0-1-0-1' },
-    //       ],
-    //     },
-    //   ],
-    // },
-])
+//node-tree
+const treeData = ref<CdpResultNodeTree[]>([])
+const treeDataHash = ref("")
+const treeElemenet = ref(null)
+const treeDataDesc = ref("No Data")
+const treeSelNodeProperty = ref<NodeProperty>()
+const elTreeExpandlist = ref<string[]>([])
 const defaultProps = {
     children: 'children',
     label: 'label',
 }
+const treeSelUuid = ref("")
+//node-tree
+//  -search 
+const treeFilterText = ref('')
+watch(treeFilterText, (val) => {
+    let el = treeElemenet.value!;
+    //@ts-ignore
+    if (el.filter) {
+        //@ts-ignore
+        el.filter(val)
+    }
 
-const onSelect = () => {
+})
 
+const onTreeFilter = (value: string, data: any) => {
+    if (!value) return true
+    return data.label.includes(value)
+}
+
+//@ts-ignore
+const onTreeExpand = (data: CdpResultNodeTree, el, root) => {
+    elTreeExpandlist.value.push(data.key)
+    console.log(elTreeExpandlist.value, "---expand")
+}
+
+//@ts-ignore
+const onTreeCollapse = (data: CdpResultNodeTree, el, root) => {
+    let k = elTreeExpandlist.value.indexOf(data.key)
+    console.log(`collapse the node:${k}`)
+    if (k >= 0) {
+        elTreeExpandlist.value.splice(k - 1, 1)
+    }
+    console.log(elTreeExpandlist.value, "---collapse after")
+}
+
+const onTreeSelect = (data: any) => {
+    console.log("onsel key:", data)
+    if (!data["key"]) return 
+    console.log(chunk_nodeproperty.replace("#name", data.key.substr(1).replace(/\./g, "/")), "-->>>chunk_nodeproperty")
+    CdpDebugger.inc().evalute_js(chunk_nodeproperty.replace("#name", data.key.substr(1).replace(/\./g, "/")))
 }
 
 watch(
-    ()=>globalProp.connectStatu, 
-    (val: EConnectStatu)=>{
+    () => globalProp.connectStatu,
+    (val: EConnectStatu) => {
         console.log("node tree->", val)
         if (val == EConnectStatu.Connected) {
-            console.log("start update")
-            setTimeout(() => {
-                console.log("call once")
-                // requestAnimationFrame(()=>{
+            treeDataDesc.value = "Requesting..."
+            CdpDebugger.inc().onResultNodeTree = (val: CdpResultNodeTree[]) => {
+                const str_treehash = JSON.stringify(val)
+                if (treeDataHash.value != str_treehash) {
+                    console.log("refresh nodetree")
+                    treeData.value = val
+                    treeDataHash.value = str_treehash
+                    return
+                }
+            }
+            CdpDebugger.inc().onResultNodeProp = (val: NodeProperty) => {
+                console.log("===>>node property: ")
+                console.log(val)
+                treeSelNodeProperty.value = val
+            }
+            setInterval(() => {
                 CdpDebugger.inc().evalute_js(chunk_nodetree)
-                console.log("startr animation frame", Date())
-            // })
-            }, 100);
+            }, 1000)
 
         }
-        
     }
 )
+
+const chunk_checkuuids = `
+let cc = window.cc;
+let cur_scene = cc.director.getScene();
+let node_propty = cur_scene.getChildren();
+node_propty
+`
+
+const chunk_nodeproperty = `
+let node = cc.find('#name');
+let watch_node = {
+    "name": node.name,
+    "position":node.position
+}
+let map_data = {
+    tag: "NODE_PROPERTY", 
+    val: watch_node
+};
+map_data
+`
 
 const chunk_nodetree = `
 let cc = window.cc;
 let cur_scene = cc.director.getScene();
 let cur_children = cur_scene.getChildren();
-console.log(cur_children, "-->cur_children");
-let map_data = {};
-let iter_func = (node, jsobj)=> {
+let map_data = {
+    tag: "NOTE_TREE"
+};
+let label = cur_scene.name;
+map_data["label"] = label;
+map_data["key"] = label;
+map_data["uuid"] = cur_scene.uuid;
+map_data["children"] = []
+let iter_func = (node, child_arr, keyname) => {
     let cd = node.getChildren();
-    let label = node.name;
-    jsobj["label"] = label;
-    jsobj["key"] = label;
-    if (cd.length > 0){
-        jsobj["children"] = [];
-        for (let k in cd) {
-            jsobj["children"][cd[k].name] = {}
-            iter_func(cd[k], jsobj["children"][cd[k].name]);  
+    let cd_s;
+    for (let k in cd) {
+        cd_s = cd[k];
+        let cds_info = {
+            label: cd_s.name, 
+            key: keyname + "." + cd_s.name
+        };
+        child_arr.push(cds_info);
+        if (cd_s.getChildren().length > 0){
+            cds_info["children"] = []
+            iter_func(cd_s, cds_info["children"], cds_info["key"]);  
         }
-        
     }
 }
-iter_func(cur_scene, map_data);
+iter_func(cur_scene, map_data["children"], "");
 map_data
 `
 
 </script>
 
 <style scoped>
-#treenode_menu {
-    padding-left: 20px;
-    height: 4lvh;
-    background: aqua;
-    border: 1px solid black;
-}
 
-#panel_nodeinfo {
+#panel-nodeinfo {
     background-color: bisque;
 }
 
-#panel_tree {
+#panel-tree,#panel-debugeval {
     border: 1px solid black;
+    overflow-y: auto;
+    height: 400px;
+}
+
+#row-functional {
+    overflow-y: auto;
+    height: 400px;
 }
 </style>

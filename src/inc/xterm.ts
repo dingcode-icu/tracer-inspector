@@ -4,6 +4,7 @@ import { listen } from "@tauri-apps/api/event"
 import { WebglAddon } from "xterm-addon-webgl";
 import { AttachAddon } from "xterm-addon-attach";
 import CdpDebugger, { CdpEvent, CdpEventConsole, CdpEventTrace } from "./cdp";
+import { SearchAddon } from "xterm-addon-search";
 
 
 const defaultTheme = {
@@ -34,7 +35,7 @@ export class XtermCompoment {
     private _xterm: Terminal | undefined;
 
     private constructor() {
-        const el = document.getElementById('xterm_container') as HTMLElement
+        const el = document.getElementById('xterm-cont') as HTMLElement
         if (!el) { console.log("not found element named xterm_container"); return; }
         const term = new Terminal({
             disableStdin: false,
@@ -44,15 +45,6 @@ export class XtermCompoment {
             theme: defaultTheme
         });
         this._xterm = term
-        term.onData((a1, a2) => {
-            console.log("ondata")
-        })
-        term.onBinary(() => {
-            console.log("on onBinary")
-        })
-        term.onWriteParsed(() => {
-            console.log("onn onWriteParsed")
-        })
         term.open(el)
         term.writeln('============================')
         term.writeln('Welcome Tracer-inspector :3')
@@ -80,6 +72,11 @@ export class XtermCompoment {
         window.addEventListener('resize', () => {
             fitAddon.fit()
         })
+
+        //search 
+        const searchAddon = new SearchAddon()
+        this._xterm!.loadAddon(searchAddon)
+    
         fitAddon.fit()
     }
 

@@ -1,12 +1,28 @@
 <template>
     <div class="container">
-        <div id="panel_header">
+        <div id="panel-header">
             <el-row>
                 <AvatarConnect @on-connected-statu="onStatuChange" />
             </el-row>
         </div>
-        <div id="panel_functional">
+        <div id="panel-functional">
+            <el-row id="header-tree">
+                <el-text class="mx-1">
+                    <el-icon>
+                        <ElementPlus />
+                    </el-icon>
+                    节点树
+                </el-text>
+            </el-row>
             <NodeTree :connectStatu="connectStatu"></NodeTree>
+            <el-row id="console-menu">
+                <el-text class="mx-1">
+                    <el-icon>
+                        <Bell />
+                    </el-icon>
+                    命令行
+                </el-text>
+            </el-row>
             <XTerm :connectStatu="connectStatu"></XTerm>
         </div>
     </div>
@@ -19,7 +35,7 @@ import XTerm from "./Xterm.vue"
 import AvatarConnect from "./Menu/AvatarConnect.vue"
 import { EConnectStatu } from "../inc/cdp";
 import { ref } from "vue";
-
+import { Bell, ElementPlus } from '@element-plus/icons-vue'
 
 const connectStatu = ref<EConnectStatu>(EConnectStatu.Idle)
 
@@ -29,12 +45,15 @@ const onStatuChange = (statu: EConnectStatu) => {
 </script>
 
 <style scoped>
-#panel_functional {
-    height: 40svh;
-}
-
-#panel_header {
+#panel-header {
     min-height: 4vh;
     background-color: aqua;
+}
+
+#header-tree,#console-menu{
+    padding-left: 20px;
+    height: 4lvh;
+    background: aqua;
+    border: 1px solid black;
 }
 </style>

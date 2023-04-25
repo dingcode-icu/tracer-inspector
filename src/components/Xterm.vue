@@ -1,23 +1,14 @@
 <template>
     <div>
-        <el-row id="console-menu">
-            <el-text class="mx-1">
-                <el-icon>
-                    <Bell />
-                </el-icon>
-                命令行
-            </el-text>
-        </el-row>
         <el-row id="console-cont">
-            <div id="xterm_container"></div>
+            <div id="xterm-cont"></div>
         </el-row>
-
     </div>
 </template>
 
 
 <script setup lang="ts">
-import { Bell } from '@element-plus/icons-vue'
+
 import 'xterm/css/xterm.css'
 import { onMounted, watch } from 'vue';
 import { XtermCompoment } from '../inc/xterm';
@@ -45,18 +36,12 @@ watch(
 </script>
 
 <style scoped>
-#console-menu {
-    padding-left: 20px;
-    height: 4lvh;
-    background: aqua;
-    border: 1px solid black;
-}
 
 #console-cont {
     padding-bottom: 2px;
 }
 
-#xterm_container {
+#xterm-cont {
     background-color: aqua;
     width: 100%;
 }
