@@ -1,8 +1,10 @@
 <template>
     <div>
         <el-row id="row-functional">
-            <el-col :span="6" id="panel-tree">
-                <el-input v-if="treeDataHash.length > 0" v-model="treeFilterText" placeholder="Search..." :suffix-icon="Search"/>
+            <el-col :span="24" id="panel-tree">
+                <el-input v-if="treeDataHash.length > 0" v-model="treeFilterText" placeholder="Search..." :suffix-icon="Search">
+                    <template #prepend>cur:{{ treeElemenetCount }}</template>
+                    </el-input>
                 <el-tree ref="treeElemenet" v-if="treeData.length > 0" :data="treeData" :props="defaultProps" node-key="key"
                     :default-expanded-keys="elTreeExpandlist" @node-click="onTreeSelect" @node-expand="onTreeExpand"
                     @node-collapse="onTreeCollapse" 
@@ -11,10 +13,10 @@
                 <el-empty v-else :description="treeDataDesc">
                 </el-empty>
             </el-col>
-            <el-col :span="6" id="panel-nodeprop">
+            <el-col v-if="treeSelNodeProperty" :span="6" id="panel-nodeprop">
+                <el-row>Properties</el-row>
+                <el-divider />
                 <NodeProp :nodeProps="treeSelNodeProperty"></NodeProp>
-            </el-col>
-            <el-col :span="12" id="panel-debugeval">
             </el-col>
         </el-row>
     </div>
@@ -31,8 +33,9 @@ const globalProp = defineProps(["connectStatu"])
 
 //node-tree
 const treeData = ref<CdpResultNodeTree[]>([])
-const treeDataHash = ref("")
+
 const treeElemenet = ref(null)
+const treeElemenetCount = ref(0)
 const treeDataDesc = ref("No Data")
 const treeSelNodeProperty = ref<NodeProperty>()
 const elTreeExpandlist = ref<string[]>([])
@@ -82,18 +85,20 @@ const onTreeSelect = (data: any) => {
     CdpDebugger.inc().evalute_js(chunk_nodeproperty.replace("#name", data.key.substr(1).replace(/\./g, "/")))
 }
 
+//tree hash tree-data
+let treeDataHash = ""
 watch(
     () => globalProp.connectStatu,
     (val: EConnectStatu) => {
         console.log("node tree->", val)
         if (val == EConnectStatu.Connected) {
             treeDataDesc.value = "Requesting..."
-            CdpDebugger.inc().onResultNodeTree = (val: CdpResultNodeTree[]) => {
+            CdpDebugger.inc().onResultNodeTree = ( val: CdpResultNodeTree[], analise:{count: number}) => {
                 const str_treehash = JSON.stringify(val)
-                if (treeDataHash.value != str_treehash) {
-                    console.log("refresh nodetree")
+                if (treeDataHash != str_treehash) {
                     treeData.value = val
-                    treeDataHash.value = str_treehash
+                    treeDataHash = str_treehash
+                    treeElemenetCount.value = analise.count
                     return
                 }
             }
@@ -131,17 +136,22 @@ map_data
 `
 
 const chunk_nodetree = `
-let cc = window.cc;
 let cur_scene = cc.director.getScene();
 let cur_children = cur_scene.getChildren();
-let map_data = {
-    tag: "NOTE_TREE"
+let root = {
+    tag: "NOTE_TREE", 
+    global: {
+        count: 1
+    }, 
+    tree_map: {}
 };
 let label = cur_scene.name;
-map_data["label"] = label;
-map_data["key"] = label;
-map_data["uuid"] = cur_scene.uuid;
-map_data["children"] = []
+let tree_data = root["tree_map"]
+let analyse_data = root["global"]
+tree_data["label"] = label;
+tree_data["key"] = label;
+tree_data["uuid"] = cur_scene.uuid;
+tree_data["children"] = []
 let iter_func = (node, child_arr, keyname) => {
     let cd = node.getChildren();
     let cd_s;
@@ -152,14 +162,15 @@ let iter_func = (node, child_arr, keyname) => {
             key: keyname + "." + cd_s.name
         };
         child_arr.push(cds_info);
+        analyse_data["count"] += 1;
         if (cd_s.getChildren().length > 0){
             cds_info["children"] = []
             iter_func(cd_s, cds_info["children"], cds_info["key"]);  
         }
     }
 }
-iter_func(cur_scene, map_data["children"], "");
-map_data
+iter_func(cur_scene, tree_data["children"], "");
+root
 `
 
 </script>

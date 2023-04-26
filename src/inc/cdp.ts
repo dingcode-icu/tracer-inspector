@@ -111,8 +111,8 @@ export default class CdpDebugger {
         this._onConsole = method
     }
 
-    public _onResultNodeTree: ((evt: CdpResultNodeTree[]) => void | undefined) | undefined;
-    public set onResultNodeTree(method: (evt: CdpResultNodeTree[]) => void) {
+    public _onResultNodeTree: ((evt: CdpResultNodeTree[], analysis:{count:number}) => void | undefined) | undefined;
+    public set onResultNodeTree(method: (evt: CdpResultNodeTree[], analysis:{count:number}) => void) {
         this._onResultNodeTree = method
     }
 
@@ -197,13 +197,9 @@ export default class CdpDebugger {
             let func_tag = root["tag"]
             switch (func_tag) {
                 case "NOTE_TREE":
-                    this._onResultNodeTree!([
-                        {
-                            label: root["label"],
-                            key: root["key"],
-                            children: root["children"]
-                        }
-                    ])
+                    this._onResultNodeTree!( [
+                        root["tree_map"]
+                    ], root["global"])
                     break;
                 case "NODE_PROPERTY":
                     this._onResultNodeProp!(root["val"])
