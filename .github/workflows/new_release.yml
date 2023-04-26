@@ -35,7 +35,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        platform: [macos-latest, ubuntu-latest, windows-latest]
+        platform: [macos-latest, windows-latest]
     runs-on: ${{ matrix.platform }}
     steps:
       - name: Checkout repository
@@ -76,7 +76,7 @@ jobs:
           releaseDraft: true
           prerelease: false
   updater:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     needs: [create-release, build-tauri]
 
     steps:
