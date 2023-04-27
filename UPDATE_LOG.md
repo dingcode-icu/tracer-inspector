@@ -1,5 +1,12 @@
 # Updater Log
 
+
+## v0.0.8
+
+* test ci \ 
+* base functional \
+
+
 ## v0.0.7
 
 * test ci \ 
