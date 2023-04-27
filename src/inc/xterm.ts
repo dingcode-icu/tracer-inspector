@@ -1,48 +1,49 @@
 import { Terminal } from "xterm";
 import { FitAddon } from "xterm-addon-fit";
-import { listen } from "@tauri-apps/api/event"
-import { WebglAddon } from "xterm-addon-webgl";
 import { AttachAddon } from "xterm-addon-attach";
-import CdpDebugger, { CdpEvent, CdpEventConsole, CdpEventTrace } from "./cdp";
-import { SearchAddon } from "xterm-addon-search";
+import CdpDebugger from "./cdp";
+import { ISearchOptions, SearchAddon } from "xterm-addon-search";
 
-
-const defaultTheme = {
-    foreground: '#ffffff', // 字体
-    background: '#1b212f', // 背景色
-    cursor: '#ffffff', // 设置光标
-    selection: 'rgba(255, 255, 255, )',
+const AdventureTime = {
+    foreground: '#d2d2d2',
+    background: '#2b2b2b',
+    cursor: '#adadad',
     black: '#000000',
-    brightBlack: '#808080',
-    red: '#ce2f2b',
-    brightRed: '#f44a47',
-    green: '#00b976',
-    brightGreen: '#05d289',
-    yellow: '#e0d500',
-    brightYellow: '#f4f628',
-    magenta: '#bd37bc',
-    brightMagenta: '#d86cd8',
-    blue: '#1d6fca',
-    brightBlue: '#358bed',
-    cyan: '#00a8cf',
-    brightCyan: '#19b8dd',
-    white: '#e5e5e5',
-    brightWhite: '#ffffff'
+    red: '#d81e00',
+    green: '#5ea702',
+    yellow: '#cfae00',
+    blue: '#427ab3',
+    magenta: '#89658e',
+    cyan: '#00a7aa',
+    white: '#dbded8',
+    brightBlack: '#686a66',
+    brightRed: '#f54235',
+    brightGreen: '#99e343',
+    brightYellow: '#fdeb61',
+    brightBlue: '#84b0d8',
+    brightMagenta: '#bc94b7',
+    brightCyan: '#37e6e8',
+    brightWhite: '#f1f1f0'
 }
+
 
 export class XtermCompoment {
     private static _comp: XtermCompoment;
     private _xterm: Terminal | undefined;
 
+    private _search_addon: SearchAddon | null = null;
+
     private constructor() {
         const el = document.getElementById('xterm-cont') as HTMLElement
         if (!el) { console.log("not found element named xterm_container"); return; }
         const term = new Terminal({
+            fontSize: 14,
+            fontFamily: '"Menlo for Powerline", Menlo, Consolas, "Liberation Mono", Courier, monospace',
             disableStdin: false,
             wordSeparator: "",
             cursorStyle: "block",
             cursorBlink: true,
-            theme: defaultTheme
+            theme: AdventureTime
         });
         this._xterm = term
         term.open(el)
@@ -58,13 +59,6 @@ export class XtermCompoment {
         this._xterm!.loadAddon(attachAddon);
     }
 
-    public async start_attach_event() {
-        CdpDebugger.inc().onConsole = (evt: CdpEvent<CdpEventConsole>) => {
-            // console.log(evt, "-->>evt ")
-            this._xterm!.writeln(evt.out.msg)
-        }
-    }
-
     private async reg_addone() {
         //fit
         const fitAddon = new FitAddon()
@@ -72,12 +66,26 @@ export class XtermCompoment {
         window.addEventListener('resize', () => {
             fitAddon.fit()
         })
+        fitAddon.fit()
 
         //search 
         const searchAddon = new SearchAddon()
         this._xterm!.loadAddon(searchAddon)
-    
-        fitAddon.fit()
+        this._search_addon = searchAddon
+    }
+
+    public findNext(f_txt: string, option?: ISearchOptions): boolean {
+        if (!this._search_addon) return false;
+        return this._search_addon!.findNext(f_txt, option)
+    }
+
+    public findPre(f_txt: string, option?: ISearchOptions): boolean {
+        if (!this._search_addon) return false;
+        return this._search_addon!.findPrevious(f_txt, option)
+    }
+
+    public get xterm() {
+        return this._xterm
     }
 
     public static inc(): XtermCompoment {

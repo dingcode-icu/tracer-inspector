@@ -23,6 +23,9 @@
         "scope": [
           "http://*:6086/json"
         ]
+      }, 
+      "globalShortcut": {
+        "all": true
       }
     },
     "bundle": {

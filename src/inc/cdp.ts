@@ -238,7 +238,6 @@ export default class CdpDebugger {
         }
         console.log(`addr is:${addr}...`)
         let ws = new WebSocketAsPromised(addr!)
-        console.log("async ?")
         this._ws = ws
         ws.onMessage.addListener(data => {
             this.filter_handle_resp(data)

@@ -1,7 +1,7 @@
 <template>
     <div>
         <el-row id="row-functional">
-            <el-col :span="24" id="panel-tree">
+            <el-col :span="12" id="panel-tree">
                 <el-input v-if="treeDataHash.length > 0" v-model="treeFilterText" placeholder="Search..." :suffix-icon="Search">
                     <template #prepend>cur:{{ treeElemenetCount }}</template>
                     </el-input>
@@ -13,7 +13,7 @@
                 <el-empty v-else :description="treeDataDesc">
                 </el-empty>
             </el-col>
-            <el-col v-if="treeSelNodeProperty" :span="6" id="panel-nodeprop">
+            <el-col v-if="treeSelNodeProperty" :span="12" id="panel-nodeprop">
                 <el-row>Properties</el-row>
                 <el-divider />
                 <NodeProp :nodeProps="treeSelNodeProperty"></NodeProp>
@@ -65,23 +65,18 @@ const onTreeFilter = (value: string, data: any) => {
 //@ts-ignore
 const onTreeExpand = (data: CdpResultNodeTree, el, root) => {
     elTreeExpandlist.value.push(data.key)
-    console.log(elTreeExpandlist.value, "---expand")
 }
 
 //@ts-ignore
 const onTreeCollapse = (data: CdpResultNodeTree, el, root) => {
     let k = elTreeExpandlist.value.indexOf(data.key)
-    console.log(`collapse the node:${k}`)
     if (k >= 0) {
         elTreeExpandlist.value.splice(k - 1, 1)
     }
-    console.log(elTreeExpandlist.value, "---collapse after")
 }
 
 const onTreeSelect = (data: any) => {
-    console.log("onsel key:", data)
     if (!data["key"]) return 
-    console.log(chunk_nodeproperty.replace("#name", data.key.substr(1).replace(/\./g, "/")), "-->>>chunk_nodeproperty")
     CdpDebugger.inc().evalute_js(chunk_nodeproperty.replace("#name", data.key.substr(1).replace(/\./g, "/")))
 }
 
@@ -90,7 +85,6 @@ let treeDataHash = ""
 watch(
     () => globalProp.connectStatu,
     (val: EConnectStatu) => {
-        console.log("node tree->", val)
         if (val == EConnectStatu.Connected) {
             treeDataDesc.value = "Requesting..."
             CdpDebugger.inc().onResultNodeTree = ( val: CdpResultNodeTree[], analise:{count: number}) => {
@@ -103,8 +97,7 @@ watch(
                 }
             }
             CdpDebugger.inc().onResultNodeProp = (val: NodeProperty) => {
-                console.log("===>>node property: ")
-                console.log(val)
+                console.log("===>>node property: ", val)
                 treeSelNodeProperty.value = val
             }
             setInterval(() => {
@@ -183,12 +176,13 @@ root
 
 #panel-tree,#panel-debugeval {
     border: 1px solid black;
-    overflow-y: auto;
+    overflow-y: scroll;
     height: 400px;
+    max-width: 400px;
 }
 
 #row-functional {
-    overflow-y: auto;
+    overflow-y: hidden;
     height: 400px;
 }
 </style>

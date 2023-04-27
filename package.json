@@ -22,7 +22,8 @@
     "xterm-addon-attach": "^0.8.0",
     "xterm-addon-fit": "^0.7.0",
     "xterm-addon-search": "^0.11.0",
-    "xterm-addon-webgl": "^0.14.0"
+    "xterm-addon-webgl": "^0.14.0",
+    "xterm-theme": "^1.1.0"
   },
   "devDependencies": {
     "@actions/github": "^5.1.1",
