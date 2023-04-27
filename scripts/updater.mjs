@@ -103,13 +103,16 @@ updater().catch(console.error);
 
 // 获取签名内容
 async function getSignature(url) {
+  console.log("find sign url is -->>", url)
   try {
     const response = await fetch(url, {
       method: 'GET',
       headers: { 'Content-Type': 'application/octet-stream' },
     });
+    console.log("sign url is :", url)
     return response.text();
-  } catch (_) {
+  } catch (err) {
+    console.log("catch err ", err)
     return '';
   }
 }
