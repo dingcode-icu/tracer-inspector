@@ -120,8 +120,9 @@ async function getSignature(url) {
       method: 'GET',
       headers: { 'Content-Type': 'application/octet-stream' },
     });
-    console.log("sign url is :", url, "-resp:", await response.text())
-    return await response.text();
+    let sign = await response.text()
+    console.log("sign url is :", url, "  resp:", sign)
+    return sign;
   } catch (err) {
     console.log("catch err ", err)
     return '';
