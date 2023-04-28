@@ -54,36 +54,47 @@ async function updater() {
   };
 
   const setAsset = async (asset, reg, platforms) => {
-    let sig = '';
-    if (/.sig$/.test(asset.name)) {
-      sig = await getSignature(asset.browser_download_url);
-    }
     platforms.forEach((platform) => {
       if (reg.test(asset.name)) {
-        // 设置平台签名，检测应用更新需要验证签名
-        if (sig) {
-          updateData.platforms[platform].signature = sig;
-          return;
-        }
         // 设置下载链接
         updateData.platforms[platform].url = asset.browser_download_url;
+        signer_from_asset
+        updateData.platforms[platform].signature = asset.browser_download_url;
       }
     });
   };
 
+  let signer_from_asset = {
+    "exe":"exe-sign", 
+    "dmg": "dmg-sign"
+  }
+  const pp = latestRelease.assets.map(async (asset) => {
+    if (/.sig$/.test(asset.name)) {
+      if (/.app.tar.gz$/.test(asset.name)){
+        signer_from_asset["dmg"] = await getSignature(asset.browser_download_url);
+      }
+      else if (/.msi.zip/.test(asset.name)){
+        signer_from_asset["exe"] = await getSignature(asset.browser_download_url);
+      }
+    }
+  })
+  await Promise.allSettled(pp);
+
+  console.log(signer_from_asset, "-->>signer from asset")
+
   const promises = latestRelease.assets.map(async (asset) => {
     // windows
-    await setAsset(asset, /.msi.zip/, ['win64', 'windows-x86_64']);
+    await setAsset(asset, /.msi.zip/, ['win64', 'windows-x86_64'], signer_from_asset.exe);
 
     // darwin
     await setAsset(asset, /.app.tar.gz/, [
       'darwin',
       'darwin-x86_64',
       'darwin-aarch64',
-    ]);
+    ], signer_from_asset.dmg);
 
     // linux
-    await setAsset(asset, /.AppImage.tar.gz/, ['linux', 'linux-x86_64']);
+    await setAsset(asset, /.AppImage.tar.gz/, ['linux', 'linux-x86_64'], "NOT-SET");
   });
   await Promise.allSettled(promises);
 

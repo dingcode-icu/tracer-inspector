@@ -36,7 +36,6 @@ import AvatarConnect from "./Menu/AvatarConnect.vue"
 import { EConnectStatu } from "../inc/cdp";
 import { onMounted, ref } from "vue";
 import { Bell, ElementPlus } from '@element-plus/icons-vue'
-import GlobalShortcut from "../inc/g_shortcut";
 
 const connectStatu = ref<EConnectStatu>(EConnectStatu.Idle)
 
@@ -44,7 +43,7 @@ const onStatuChange = (statu: EConnectStatu) => {
     connectStatu.value = statu
 }
 
-onMounted(async ()=> {
+onMounted(async () => {
 })
 
 </script>
@@ -55,7 +54,8 @@ onMounted(async ()=> {
     background-color: aqua;
 }
 
-#header-tree,#console-menu{
+#header-tree,
+#console-menu {
     padding-left: 20px;
     height: 4lvh;
     background: aqua;

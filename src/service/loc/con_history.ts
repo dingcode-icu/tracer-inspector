@@ -28,6 +28,7 @@ export default class SvrConHistory implements BaseConHistory {
                 return [false, `host <${his.host}> already exists!`]
             }
         }
+        last_list.push(new_his)
         let [issuc, err] = await invoke("cache_set", { key: BaseConHistory.CON_HISTORY, val: JSON.stringify(last_list) })
             .then((res) => {
                 return [true, ""]

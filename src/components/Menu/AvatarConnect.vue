@@ -86,7 +86,7 @@ const isConDialogVisible = ref(true)
 const listConHistory = ref<ConnectHistory[]>([])
 
 const debugHostForm = reactive({
-    device_name: "Redmi",
+    device_name: "LenovoPad",
     host: "10.250.33.31",
     port: 6086
 })

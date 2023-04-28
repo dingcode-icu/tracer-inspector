@@ -1,19 +1,21 @@
 <template>
     <div>
         <el-row id="row-functional">
-            <el-col :span="12" id="panel-tree">
-                <el-input v-if="treeDataHash.length > 0" v-model="treeFilterText" placeholder="Search..." :suffix-icon="Search">
+            <el-col :span="8" id="panel-tree">
+                <el-input v-if="treeDataHash.length > 0" v-model="treeFilterText" placeholder="Search..."
+                    :suffix-icon="Search">
                     <template #prepend>cur:{{ treeElemenetCount }}</template>
-                    </el-input>
+                </el-input>
                 <el-tree ref="treeElemenet" v-if="treeData.length > 0" :data="treeData" :props="defaultProps" node-key="key"
                     :default-expanded-keys="elTreeExpandlist" @node-click="onTreeSelect" @node-expand="onTreeExpand"
-                    @node-collapse="onTreeCollapse" 
-                    :filter-node-method="onTreeFilter"
-                    />
+                    @node-collapse="onTreeCollapse" :filter-node-method="onTreeFilter" />
                 <el-empty v-else :description="treeDataDesc">
                 </el-empty>
             </el-col>
-            <el-col v-if="treeSelNodeProperty" :span="12" id="panel-nodeprop">
+            <el-col :span="!treeSelNodeProperty ? 16 : 8" id="panel-dashboard">
+                <DashBoard></DashBoard>
+            </el-col>
+            <el-col v-if="treeSelNodeProperty" id="panel-nodeprop" :push=6>
                 <el-row>Properties</el-row>
                 <el-divider />
                 <NodeProp :nodeProps="treeSelNodeProperty"></NodeProp>
@@ -25,9 +27,11 @@
 <script setup lang="ts">
 import { ref, watch } from "vue";
 import NodeProp from "./NodeProp.vue"
+import DashBoard from "./DashBoard.vue";
 import CdpDebugger, { CdpResultNodeTree, EConnectStatu } from "../inc/cdp";
 import { NodeProperty } from "../model/node_property";
 import { Search } from "@element-plus/icons-vue";
+
 
 const globalProp = defineProps(["connectStatu"])
 
@@ -76,7 +80,7 @@ const onTreeCollapse = (data: CdpResultNodeTree, el, root) => {
 }
 
 const onTreeSelect = (data: any) => {
-    if (!data["key"]) return 
+    if (!data["key"]) return
     CdpDebugger.inc().evalute_js(chunk_nodeproperty.replace("#name", data.key.substr(1).replace(/\./g, "/")))
 }
 
@@ -87,7 +91,7 @@ watch(
     (val: EConnectStatu) => {
         if (val == EConnectStatu.Connected) {
             treeDataDesc.value = "Requesting..."
-            CdpDebugger.inc().onResultNodeTree = ( val: CdpResultNodeTree[], analise:{count: number}) => {
+            CdpDebugger.inc().onResultNodeTree = (val: CdpResultNodeTree[], analise: { count: number }) => {
                 const str_treehash = JSON.stringify(val)
                 if (treeDataHash != str_treehash) {
                     treeData.value = val
@@ -143,7 +147,6 @@ let tree_data = root["tree_map"]
 let analyse_data = root["global"]
 tree_data["label"] = label;
 tree_data["key"] = label;
-tree_data["uuid"] = cur_scene.uuid;
 tree_data["children"] = []
 let iter_func = (node, child_arr, keyname) => {
     let cd = node.getChildren();
@@ -152,7 +155,8 @@ let iter_func = (node, child_arr, keyname) => {
         cd_s = cd[k];
         let cds_info = {
             label: cd_s.name, 
-            key: keyname + "." + cd_s.name
+            key: keyname + "." + cd_s.name, 
+            disabled: cd_s.active
         };
         child_arr.push(cds_info);
         analyse_data["count"] += 1;
@@ -169,12 +173,12 @@ root
 </script>
 
 <style scoped>
-
 #panel-nodeinfo {
     background-color: bisque;
 }
 
-#panel-tree,#panel-debugeval {
+#panel-tree,
+#panel-nodeprop {
     border: 1px solid black;
     overflow-y: scroll;
     height: 400px;
