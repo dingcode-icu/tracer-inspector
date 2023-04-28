@@ -36,6 +36,8 @@ import AvatarConnect from "./Menu/AvatarConnect.vue"
 import { EConnectStatu } from "../inc/cdp";
 import { onMounted, ref } from "vue";
 import { Bell, ElementPlus } from '@element-plus/icons-vue'
+import { InspService } from "../service/svr";
+import { installUpdate, onUpdaterEvent } from "@tauri-apps/api/updater";
 
 const connectStatu = ref<EConnectStatu>(EConnectStatu.Idle)
 
@@ -43,7 +45,27 @@ const onStatuChange = (statu: EConnectStatu) => {
     connectStatu.value = statu
 }
 
+const onCheckUpdate = async () => {
+    console.log("check update...")
+    let [is_need, data] = await InspService.api_update.get_latestver()
+    if (is_need){
+        console.log(`update reuqire! manifest is ${data}`)
+        await installUpdate()
+        //wait to install suc!
+        const unlisten = await onUpdaterEvent(({error, status}) => {
+            console.log('Updater event', error, status);
+        })
+        unlisten()
+        return 
+    }
+    console.log("no need update!go on.")
+}
+
 onMounted(async () => {
+    //check update
+    await onCheckUpdate()
+    //do next
+    
 })
 
 </script>

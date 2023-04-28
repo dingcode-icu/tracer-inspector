@@ -1,9 +1,15 @@
+import SvrCheckUpdate from "./loc/chk_update";
 import SvrConHistory from "./loc/con_history";
 
 export interface ConnectHistory {
     device_name: string,
     host: string,
     port?: number
+}
+
+
+export abstract class BaseCheckUpdate {
+    abstract get_latestver(): Promise<[boolean, string/**新包的下载地址 */]>
 }
 
 export abstract class BaseConHistory {
@@ -20,9 +26,14 @@ export class InspService {
 
     private static _inc: InspService;
     private static  _api_conhistory: BaseConHistory = new SvrConHistory()
+    private static  _api_update: BaseCheckUpdate = new SvrCheckUpdate()
     
     public static get api_conhis(): BaseConHistory{
         return this._api_conhistory
+    }
+
+    public static get api_update() : BaseCheckUpdate {
+        return this._api_update
     }
     
     

@@ -69,11 +69,11 @@ async function updater() {
     dmg: "dmg-sign"
   }
   const pp = latestRelease.assets.map(async (asset) => {
-    if (/.sig$/.test(asset.name)) {
-      if (/.app.tar.gz$/.test(asset.name)){
+    if (/.sig/.test(asset.name)) {
+      if (/.app.tar.gz.sig/.test(asset.name)){
         signer_from_asset.dmg = await getSignature(asset.browser_download_url);
       }
-      else if (/.msi.zip$/.test(asset.name)){
+      else if (/.msi.zip.sig/.test(asset.name)){
         signer_from_asset.exe = await getSignature(asset.browser_download_url);
       }
     }
