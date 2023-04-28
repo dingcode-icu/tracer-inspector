@@ -53,13 +53,14 @@ async function updater() {
     },
   };
 
-  const setAsset = async (asset, reg, platforms) => {
+  const setAsset = async (asset, reg, platforms, sign) => {
+    console.log(sign, "--->>sign")
     platforms.forEach((platform) => {
       if (reg.test(asset.name)) {
         // 设置下载链接
         updateData.platforms[platform].url = asset.browser_download_url;
         signer_from_asset
-        updateData.platforms[platform].signature = asset.browser_download_url;
+        updateData.platforms[platform].signature = sign
       }
     });
   };
