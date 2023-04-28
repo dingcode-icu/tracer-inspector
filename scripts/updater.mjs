@@ -59,23 +59,22 @@ async function updater() {
       if (reg.test(asset.name)) {
         // 设置下载链接
         updateData.platforms[platform].url = asset.browser_download_url;
-        signer_from_asset
         updateData.platforms[platform].signature = sign
       }
     });
   };
 
-  let signer_from_asset = {
-    "exe":"exe-sign", 
-    "dmg": "dmg-sign"
+  const signer_from_asset = {
+    exe:"exe-sign", 
+    dmg: "dmg-sign"
   }
   const pp = latestRelease.assets.map(async (asset) => {
     if (/.sig$/.test(asset.name)) {
       if (/.app.tar.gz$/.test(asset.name)){
-        signer_from_asset["dmg"] = await getSignature(asset.browser_download_url);
+        signer_from_asset.dmg = await getSignature(asset.browser_download_url);
       }
-      else if (/.msi.zip/.test(asset.name)){
-        signer_from_asset["exe"] = await getSignature(asset.browser_download_url);
+      else if (/.msi.zip$/.test(asset.name)){
+        signer_from_asset.exe = await getSignature(asset.browser_download_url);
       }
     }
   })
@@ -95,7 +94,7 @@ async function updater() {
     ], signer_from_asset.dmg);
 
     // linux
-    await setAsset(asset, /.AppImage.tar.gz/, ['linux', 'linux-x86_64'], "NOT-SET");
+    await setAsset(asset, /.AppImage.tar.gz/, ['linux', 'linux-x86_64'], "NOT-BUIDLD-TARGET");
   });
   await Promise.allSettled(promises);
 
@@ -121,7 +120,7 @@ async function getSignature(url) {
       method: 'GET',
       headers: { 'Content-Type': 'application/octet-stream' },
     });
-    console.log("sign url is :", url)
+    console.log("sign url is :", url, "-resp:", response.text())
     return response.text();
   } catch (err) {
     console.log("catch err ", err)
