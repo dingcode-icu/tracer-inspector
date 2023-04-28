@@ -11,19 +11,23 @@
                     @node-collapse="onTreeCollapse" :filter-node-method="onTreeFilter" />
                 <el-empty v-else :description="treeDataDesc">
                 </el-empty>
+
             </el-col>
-            <el-col :span="!treeSelNodeProperty ? 16 : 8" id="panel-dashboard">
-                <DashBoard></DashBoard>
+            <el-col :span="8" id="panel-dashboard">
+                <CmdCollapse></CmdCollapse>
+                <DashBoard>
+                </DashBoard>
             </el-col>
-            <el-col v-if="treeSelNodeProperty" id="panel-nodeprop" :push=6>
-                <el-row>Properties</el-row>
-                <el-divider />
-                <NodeProp :nodeProps="treeSelNodeProperty"></NodeProp>
+            <el-col id="panel-nodeprop" :push=6>
+                <el-row>Command</el-row>
+                <CmdCollapse></CmdCollapse>
             </el-col>
         </el-row>
     </div>
 </template>
-
+<!-- <el-draw>
+    <NodeProp :nodeProps="treeSelNodeProperty"/>
+</el-draw> -->
 <script setup lang="ts">
 import { ref, watch } from "vue";
 import NodeProp from "./NodeProp.vue"
@@ -31,6 +35,7 @@ import DashBoard from "./DashBoard.vue";
 import CdpDebugger, { CdpResultNodeTree, EConnectStatu } from "../inc/cdp";
 import { NodeProperty } from "../model/node_property";
 import { Search } from "@element-plus/icons-vue";
+import CmdCollapse from "./Panel/CmdCollapse.vue";
 
 
 const globalProp = defineProps(["connectStatu"])
