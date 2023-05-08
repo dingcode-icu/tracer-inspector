@@ -1,4 +1,7 @@
 <template>
+    <div>
+        <el-button type="primary" @click="onAddCmd">新增Cmd</el-button>
+    </div>
     <el-collapse v-model="activeCollapse" @change="onCollapseChange">
         <el-collapse-item title="Property" name="1">
             <NodeProp :nodeProps="curProps"></NodeProp>
@@ -36,6 +39,10 @@ watch(
 
 
 const activeCollapse = ref(["1"])
+
+const onAddCmd = () => {
+ 
+}
 
 
 const displayState: CmdProperty<{}> = {
