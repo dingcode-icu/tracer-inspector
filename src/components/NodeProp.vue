@@ -1,6 +1,6 @@
 <template>
     <el-row id="row-functional">
-        <el-descriptions class="margin-top" :title="curProps.name" :column="2" border>
+        <el-descriptions class="margin-top" :column="2" border>
             <el-descriptions-item>
                 <template #label>
                     <div class="cell-item">

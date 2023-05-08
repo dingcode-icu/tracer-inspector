@@ -37,6 +37,9 @@
         "icons/icon.icns",
         "icons/icon.ico"
       ],
+      "resources": [
+        "assets/*"
+      ],
       "identifier": "com.dingcode.tracer-inspector",
       "targets": "all"
     },

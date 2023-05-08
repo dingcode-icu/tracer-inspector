@@ -1,11 +1,11 @@
 <template>
     <div>
-        <el-row justify="center" :span="24">
-            <el-statistic :value="statisticResCnt">
+        <el-row justify="space-around">
+            <el-statistic :value="statisticResCnt.node_count">
                 <template #title>
                     <div style="display: inline-flex; align-items: center">
-                        Resource loaded count
-                        <el-tooltip effect="dark" content="List come from eval cc.assetManager" placement="top">
+                        Node
+                        <el-tooltip effect="dark" content="Node contain number in tree at current time." placement="top">
                             <el-icon style="margin-left: 4px" :size="12">
                                 <Warning />
                             </el-icon>
@@ -13,11 +13,23 @@
                     </div>
                 </template>
             </el-statistic>
-            <el-statistic :value="statisticResCnt">
+            <el-statistic :value="statisticResCnt.allasset_count">
                 <template #title>
                     <div style="display: inline-flex; align-items: center">
-                        Resource loaded count
-                        <el-tooltip effect="dark" content="List come from eval cc.assetManager" placement="top">
+                        All-Asset
+                        <el-tooltip effect="dark" content="List all cc.assetManager.assets in memory." placement="top">
+                            <el-icon style="margin-left: 4px" :size="12">
+                                <Warning />
+                            </el-icon>
+                        </el-tooltip>
+                    </div>
+                </template>
+            </el-statistic>
+            <el-statistic :value="statisticResCnt.cacheasset_count">
+                <template #title>
+                    <div style="display: inline-flex; align-items: center">
+                        AssetCached
+                        <el-tooltip effect="dark" content="All cachedfiles in cache dir." placement="top">
                             <el-icon style="margin-left: 4px" :size="12">
                                 <Warning />
                             </el-icon>
@@ -28,47 +40,51 @@
         </el-row>
     </div>
     <div>
-        <el-tabs class="panel-reslist" v-model="activePanel" type="card" @tab-click="onSelPanel">
-            <el-tab-pane label="Textures" name="texture" class="panel-reslist">
-            </el-tab-pane>
-            <el-tab-pane label="Audios" name="audio">
-            </el-tab-pane>
-        </el-tabs>
-        <div id="panel-goldfinger">
-            <h2>
-                tes
-            </h2>
-        </div>
+        <TableAssets :autoFreshIndex="autoFreshIndex"></TableAssets>
     </div>
 </template>
 
-
 <script setup lang="ts">
-import { ref } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 import {
     Warning,
 } from '@element-plus/icons-vue'
+import CdpDebugger, { CdpResultGInfo } from '../inc/cdp';
+import TableAssets from './Panel/TableAssets.vue';
 
-const activePanel = ref("")
+const autoFreshIndex = ref(false)
+const statisticResCnt = ref<CdpResultGInfo>({
+    node_count: 0,
+    allasset_count: 0,
+    bundle_count: 0,
+    cacheasset_count: 0
+})
 
-const statisticResCnt = ref(0)
+let ginfoDataHash = ""
+onMounted(async () => {
+    CdpDebugger.inc().onResultGInfo = (info: CdpResultGInfo) => {
+        const str_ginfohash = JSON.stringify(info)
+       
+        if (ginfoDataHash != str_ginfohash) {
+            statisticResCnt.value = info
+            ginfoDataHash = str_ginfohash
+            autoFreshIndex.value = true
+            return
+        }
+    }
 
-const onSelPanel = () => {
 
-}
+})
 </script>
 
 
 <style scoped>
-:deep(.el-tabs__content) {
+/* :deep(.el-tabs__content) {
     width: 400px;
     height: 20px;
     padding-bottom: 0px;
     border: 1px solid black;
-}
-
-:deep(.el-tabs__header) {
-}
+} */
 
 :deep(.el-dialog__header) {
     background-color: aqua;

@@ -1,49 +1,55 @@
 <template>
     <el-collapse v-model="activeCollapse" @change="onCollapseChange">
-        <el-collapse-item title="Core" name="1">
-            <el-row :gutter="40">
-                <el-col v-for="cmd in debugCmdList" :span=12>
-                    <CmdCard  :card_info="cmd"></CmdCard>    
+        <el-collapse-item title="Property" name="1">
+            <NodeProp :nodeProps="curProps"></NodeProp>
+        </el-collapse-item>
+        <el-collapse-item title="Cmd" name="2">
+            <el-row  :gutter="40">
+                <el-col id="grid-content" v-for="cmd in debugCmdList" :span=12>
+                    <CmdCard :card_info="cmd"></CmdCard>
                 </el-col>
             </el-row>
-            
         </el-collapse-item>
-        <el-collapse-item title="Logic" name="2">
-            <div>
-                Operation feedback: enable the users to clearly perceive their
-                operations by style updates and interactive effects;
-            </div>
-            <div>
-                Visual feedback: reflect current state by updating or rearranging
-                elements of the page.
-            </div>
-        </el-collapse-item>
+
     </el-collapse>
 </template>
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import { CmdProperty } from '../../model/cmd_property';
+import { NodeProperty } from '../../model/node_property';
 import CmdCard from './Cell/CmdCard.vue';
+import NodeProp from "../NodeProp.vue"
+
+const nodeProps = defineProps(["nodeProps"])
+const curProps = ref<NodeProperty>({
+    name: "unknown",
+    uuid: "unknown",
+    position: { x: 0, y: 0, z: 0 }
+})
+
+watch(
+    () => nodeProps.nodeProps,
+    (val: NodeProperty) => {
+        curProps.value = val
+    }
+)
 
 
-const activeCollapse = ref(["1", "2"])
+const activeCollapse = ref(["1"])
 
-const debugCmd: CmdProperty<{}> = {
-    short: 'Switch framecall',
-    cmd: 'test',
-    tag: '111',
-    desc: '123123asdfasdfasdfasdf',
+
+const displayState: CmdProperty<{}> = {
+    short: 'display-state',
+    cmd: `
+        cc.debug.setDisplayStats(! cc.debug.isDisplayStats());
+    `,
+    tag: 'sf',
+    desc: 'switch display state',
     resp: {}
 }
 
-const debugCmdList:CmdProperty<{}>[] = [
-    debugCmd,
-    debugCmd,
-    debugCmd,
-    debugCmd,
-    debugCmd,
-    debugCmd,
-    debugCmd,
+const debugCmdList: CmdProperty<{}>[] = [
+    displayState    
 ]
 
 
@@ -56,11 +62,19 @@ const onCollapseChange = () => {
 
 
 <style scoped>
-:deep(.el-card__header){
+:deep(.el-card__header) {
     padding: 4px;
 }
 
-:deep(.el-collapse){
+:deep(.el-collapse) {
     --el-collapse-header-height: 20px
+}
+
+#grid-content{
+    margin-bottom: 20px;
+}
+
+#grid-contnet:last-child {
+    margin-bottom: 0px;
 }
 </style>

@@ -6,7 +6,7 @@
                 Connect host by tag:
             </h3>
             <el-row justify="center">
-                <el-select v-model="selConShistory" :disabled="isSetNewhost" :filterable=true style="width: 400px;">
+                <el-select v-model="selConShistory.device_name" :disabled="isSetNewhost" :filterable=true style="width: 400px;">
                     <el-option v-for="item in listConHistory" :key="item.device_name"
                         :label="`${item.device_name}  ${item.host}:${item.port}`" :value="item.host">
                         <span style="float: left">{{ item.device_name }}</span>
@@ -79,7 +79,10 @@ const connectIco = ref("ui-svg/dis-connect.png")
 //set type
 const isSetNewhost = ref(false)
 
-const selConShistory = ref<ConnectHistory>()
+const selConShistory = ref<ConnectHistory>({
+    device_name: "",
+    host: ""
+})
 
 //dialog 
 const isConDialogVisible = ref(true)
@@ -115,6 +118,7 @@ const onConnectDebugger = async () => {
     for (const i in listConHistory.value) {
         if (Object.prototype.hasOwnProperty.call(listConHistory.value, i)) {
             const e = listConHistory.value[i];
+            console.log(`compare 2 stry ${e.device_name} and ${selConShistory.value!.device_name}`)
             if (e.device_name == selConShistory.value!.device_name) {
                 sel_form = e
                 break
@@ -167,9 +171,13 @@ const onSetDebughost = () => {
 onMounted(async () => {
     let con_list = await InspService.api_conhis.get_conhistory()
     listConHistory.value = con_list
+    console.log("api get history :", con_list)
     if (con_list.length > 0) {
+        
         selConShistory.value = con_list[0]
+        
     }
+    console.log("cur -->>", selConShistory.value)
     updateGraphics()
 })
 

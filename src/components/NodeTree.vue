@@ -1,42 +1,36 @@
 <template>
     <div>
-        <el-row id="row-functional">
+        <el-row id="row-functional" justify="space-between"  >
             <el-col :span="8" id="panel-tree">
                 <el-input v-if="treeDataHash.length > 0" v-model="treeFilterText" placeholder="Search..."
                     :suffix-icon="Search">
-                    <template #prepend>cur:{{ treeElemenetCount }}</template>
+                    <template #prepend>Find</template>
                 </el-input>
                 <el-tree ref="treeElemenet" v-if="treeData.length > 0" :data="treeData" :props="defaultProps" node-key="key"
                     :default-expanded-keys="elTreeExpandlist" @node-click="onTreeSelect" @node-expand="onTreeExpand"
                     @node-collapse="onTreeCollapse" :filter-node-method="onTreeFilter" />
                 <el-empty v-else :description="treeDataDesc">
                 </el-empty>
-
             </el-col>
-            <el-col :span="8" id="panel-dashboard">
-                <CmdCollapse></CmdCollapse>
+            <el-col :span="8" id="panel-dashboard" >
                 <DashBoard>
                 </DashBoard>
             </el-col>
-            <el-col id="panel-nodeprop" :push=6>
+            <el-col id="panel-nodeprop" :span="8">
                 <el-row>Command</el-row>
-                <CmdCollapse></CmdCollapse>
+                <CmdCollapse :nodeProps="treeSelNodeProperty"></CmdCollapse>
             </el-col>
         </el-row>
     </div>
 </template>
-<!-- <el-draw>
-    <NodeProp :nodeProps="treeSelNodeProperty"/>
-</el-draw> -->
 <script setup lang="ts">
 import { ref, watch } from "vue";
-import NodeProp from "./NodeProp.vue"
 import DashBoard from "./DashBoard.vue";
-import CdpDebugger, { CdpResultNodeTree, EConnectStatu } from "../inc/cdp";
+import CdpDebugger, { CdpResultGInfo, CdpResultNodeTree, EConnectStatu } from "../inc/cdp";
 import { NodeProperty } from "../model/node_property";
 import { Search } from "@element-plus/icons-vue";
 import CmdCollapse from "./Panel/CmdCollapse.vue";
-
+import PopProperty from "./Panel/PopProperty.vue"
 
 const globalProp = defineProps(["connectStatu"])
 
@@ -84,7 +78,7 @@ const onTreeCollapse = (data: CdpResultNodeTree, el, root) => {
     }
 }
 
-const onTreeSelect = (data: any) => {
+const onTreeSelect = (data: any, el: HTMLElement) => {
     if (!data["key"]) return
     CdpDebugger.inc().evalute_js(chunk_nodeproperty.replace("#name", data.key.substr(1).replace(/\./g, "/")))
 }
@@ -96,12 +90,12 @@ watch(
     (val: EConnectStatu) => {
         if (val == EConnectStatu.Connected) {
             treeDataDesc.value = "Requesting..."
-            CdpDebugger.inc().onResultNodeTree = (val: CdpResultNodeTree[], analise: { count: number }) => {
+            CdpDebugger.inc().start_ginfo_ping()
+            CdpDebugger.inc().onResultNodeTree = (val: CdpResultNodeTree[]) => {
                 const str_treehash = JSON.stringify(val)
                 if (treeDataHash != str_treehash) {
                     treeData.value = val
                     treeDataHash = str_treehash
-                    treeElemenetCount.value = analise.count
                     return
                 }
             }
@@ -109,10 +103,6 @@ watch(
                 console.log("===>>node property: ", val)
                 treeSelNodeProperty.value = val
             }
-            setInterval(() => {
-                CdpDebugger.inc().evalute_js(chunk_nodetree)
-            }, 1000)
-
         }
     }
 )
@@ -137,43 +127,7 @@ let map_data = {
 map_data
 `
 
-const chunk_nodetree = `
-let cur_scene = cc.director.getScene();
-let cur_children = cur_scene.getChildren();
-let root = {
-    tag: "NOTE_TREE", 
-    global: {
-        count: 1
-    }, 
-    tree_map: {}
-};
-let label = cur_scene.name;
-let tree_data = root["tree_map"]
-let analyse_data = root["global"]
-tree_data["label"] = label;
-tree_data["key"] = label;
-tree_data["children"] = []
-let iter_func = (node, child_arr, keyname) => {
-    let cd = node.getChildren();
-    let cd_s;
-    for (let k in cd) {
-        cd_s = cd[k];
-        let cds_info = {
-            label: cd_s.name, 
-            key: keyname + "." + cd_s.name, 
-            disabled: cd_s.active
-        };
-        child_arr.push(cds_info);
-        analyse_data["count"] += 1;
-        if (cd_s.getChildren().length > 0){
-            cds_info["children"] = []
-            iter_func(cd_s, cds_info["children"], cds_info["key"]);  
-        }
-    }
-}
-iter_func(cur_scene, tree_data["children"], "");
-root
-`
+
 
 </script>
 

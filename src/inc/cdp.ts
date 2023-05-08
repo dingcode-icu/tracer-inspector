@@ -1,5 +1,9 @@
+
 import { http, invoke } from "@tauri-apps/api";
 import WebSocketAsPromised from "websocket-as-promised";
+import { CHUNK_ASSETS } from "../cmd/assets_ping";
+import { CHUNK_GINFO } from "../cmd/ginfo_ping";
+import { CdpResultCocosAssets } from "../model/asset_property";
 import { NodeProperty } from "../model/node_property";
 
 enum EConType {
@@ -65,6 +69,14 @@ export interface CdpResultNodeTree {
     children: CdpResultNodeTree[]
 }
 
+
+export interface CdpResultGInfo {
+    node_count: number,
+    allasset_count: number,
+    bundle_count: number,
+    cacheasset_count: number
+}
+
 interface DebuggerTarget {
     description: string,
     devtoolsFrontendUrl: string,
@@ -94,6 +106,7 @@ export default class CdpDebugger {
     private static _con_type: EConType = EConType.Js
     private _ws: WebSocketAsPromised | null;
     private _cur_msgid: number = 1;
+    private _timer: NodeJS.Timer | null = null;
 
     private static _inc: CdpDebugger;
     private constructor(host?: string) {
@@ -106,16 +119,24 @@ export default class CdpDebugger {
         this._onResultNodeProp = method
     }
 
-    public _onConsole: ((evt: CdpEvent<CdpEventConsole>) => void | undefined) | undefined;
+    public _onConsole: ((evt: CdpEvent<CdpEventConsole>) => void) | undefined;
     public set onConsole(method: (evt: CdpEvent<CdpEventConsole>) => void) {
         this._onConsole = method
     }
-
-    public _onResultNodeTree: ((evt: CdpResultNodeTree[], analysis:{count:number}) => void | undefined) | undefined;
-    public set onResultNodeTree(method: (evt: CdpResultNodeTree[], analysis:{count:number}) => void) {
+    public _onResultNodeTree: ((evt: CdpResultNodeTree[]) => void) | undefined;
+    public set onResultNodeTree(method: (evt: CdpResultNodeTree[]) => void) {
         this._onResultNodeTree = method
     }
 
+    public _onResultGInfo: ((analysis: CdpResultGInfo) => void) | undefined;
+    public set onResultGInfo(method: (analysis: CdpResultGInfo) => void) {
+        this._onResultGInfo = method
+    }
+
+    public _onResultAsset: ((assets: CdpResultCocosAssets) => void)|undefined;
+    public set onResultAsset(method: (assets: CdpResultCocosAssets) => void) {
+        this._onResultAsset = method
+    }
 
     //js special 
     private async get_tabs(index: number, host: string, port: number = 6086) {
@@ -193,13 +214,21 @@ export default class CdpDebugger {
         if (!data) return
         if (data.type == "object") {
             let root = data.value;
-            if (!root || !root["tag"]) return 
+            if (!root || !root["tag"]) return
             let func_tag = root["tag"]
             switch (func_tag) {
-                case "NOTE_TREE":
-                    this._onResultNodeTree!( [
+                case "GINFO_INTERVAL":
+                    console.log("INTERVAL_GINFO")
+                    this._onResultNodeTree!([
                         root["tree_map"]
-                    ], root["global"])
+                    ])
+                    this._onResultGInfo!(
+                        root["global"]
+                    )
+                    break;
+                case "ASSETS_INTERVAL": 
+                    console.log("ASSETS_INTERVAL")
+                    this._onResultAsset!(root["assets"])
                     break;
                 case "NODE_PROPERTY":
                     this._onResultNodeProp!(root["val"])
@@ -290,6 +319,43 @@ export default class CdpDebugger {
             allowUnsafeEvalBlockedByCSP: false
         }
         )
+    }
+
+    public evalute_cmd_js(js_chunk: string, cmd_name: string) {
+        const try_chunk = `
+            try {
+                ${js_chunk}
+                console.log("run cmd ${cmd_name} suc!")
+            }
+            catch {
+                console.error("run cmd ${cmd_name} failed!")
+            }
+        `
+        this.req_debugger("Runtime.evaluate", {
+            expression: try_chunk,
+            objectGroup: "user_cmd",
+            includeCommandLineAPI: true,
+            silent: false,
+            returnByValue: true,
+            generatePreview: true,
+            userGesture: true,
+            awaitPromise: false,
+            replMode: true,
+            allowUnsafeEvalBlockedByCSP: false
+        }
+        )
+    }
+
+    public start_ginfo_ping() {
+        this._timer = setInterval(() => {
+            this.evalute_js(CHUNK_GINFO)
+            // this.evalute_js(CHUNK_ASSETS)
+        }, 1000)
+
+    }
+
+    public stop_ping() {
+        this._timer!.unref()
     }
 
     /**
