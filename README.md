@@ -5,9 +5,9 @@ Based on [Tauri](https://marketplace.visualstudio.com/items?itemName=tauri-apps.
 Another ide of `Cocos-Inspector plugin`.\
 We call it `Tracer-Inspector` because tracer name is more powerfull  :3
 
-* **Single Exectuable File** mini-size installer file for donwload and install.
+* **Single Exectable File** mini-size installer file for donwload and install.
 
-* **Fateste** 0 GC for framework api call.
+* **Fastest** 0 GC for framework api call.
 
 * **Cross-GamerEngine support[cocos creator, unity(todo), godot(todo)]** support every popular game engine `two thousand years later`. 
 
