@@ -1,7 +1,7 @@
 # Updater Log
 
 
-## v0.0.2
+## v0.0.1
 
 [x]base nodetree watch\
 [x]base node-property watch\
