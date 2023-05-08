@@ -1,6 +1,6 @@
 <template>
     <div>
-        <el-row id="row-functional" justify="space-between"  >
+        <el-row id="row-functional" justify="space-between">
             <el-col :span="8" id="panel-tree">
                 <el-input v-if="treeDataHash.length > 0" v-model="treeFilterText" placeholder="Search..."
                     :suffix-icon="Search">
@@ -12,7 +12,7 @@
                 <el-empty v-else :description="treeDataDesc">
                 </el-empty>
             </el-col>
-            <el-col :span="8" id="panel-dashboard" >
+            <el-col :span="8" id="panel-dashboard">
                 <DashBoard>
                 </DashBoard>
             </el-col>
