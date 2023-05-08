@@ -1,0 +1,35 @@
+{
+  "version": "v0.0.2",
+  "notes": "[x]base nodetree watch\\\r\n[x]base node-property watch\\\r\n[x]asset in memory watch\\\r\n[x]cmd execute from remote",
+  "pub_date": "2023-05-08T08:56:34.472Z",
+  "platforms": {
+    "win64": {
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVRYW1va2ViWDIrVi9NOGFPU25MWHVoNDdWOWFjK3BkRE40YXRwd09KK0NFTlVPR0QwRWNXalI5U05sb0UwL0tCK0hpOW5zVWZTbmtPVUplaFVkc2lEZkQ2OERwWklGcVFJPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNjgzNTM1OTk5CWZpbGU6dHJhY2VyLWluc3BlY3Rvcl8wLjAuMF94NjRfZW4tVVMubXNpLnppcApWRUtoT0Vnd2h4R3BERnpWRGZrUlJrREhxeFlkNkd5T1MzejRNYUNra25sU0N2eDJwRTh5L1J4RUViVkxJSXhldFJCSlJFanFFSFBvZC9kdVkyVjBBZz09Cg==",
+      "url": "https://github.com/dingcode-icu/tracer-inspector/releases/download/v0.0.2/tracer-inspector_0.0.0_x64_en-US.msi.zip.sig"
+    },
+    "linux": {
+      "signature": "",
+      "url": ""
+    },
+    "darwin": {
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVRYW1va2ViWDIrVjBocy8xRXVKV2VsYW05aEpvZDNGa3dVZXBPeURZV0pJTjVLUzIzRjZLdGVGekhYTUV2QnMwL2tnRmw3cndISEVyYmlidEtrbzMybDlicUh2QU5FUVFFPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNjgzNTM1ODQzCWZpbGU6dHJhY2VyLWluc3BlY3Rvci5hcHAudGFyLmd6ClFYOFNkdHBVV1l2aXBTVEZGVlp0WkQ1S2x1b21DQVlIbnl4SlA1WjRvV2Y4MElxMHhhY2FHdTJTeVBkdzc5R0lsUXowTjdlbnovWHBRckoxZXllOEN3PT0K",
+      "url": "https://github.com/dingcode-icu/tracer-inspector/releases/download/v0.0.2/tracer-inspector_x64.app.tar.gz.sig"
+    },
+    "darwin-aarch64": {
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVRYW1va2ViWDIrVjBocy8xRXVKV2VsYW05aEpvZDNGa3dVZXBPeURZV0pJTjVLUzIzRjZLdGVGekhYTUV2QnMwL2tnRmw3cndISEVyYmlidEtrbzMybDlicUh2QU5FUVFFPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNjgzNTM1ODQzCWZpbGU6dHJhY2VyLWluc3BlY3Rvci5hcHAudGFyLmd6ClFYOFNkdHBVV1l2aXBTVEZGVlp0WkQ1S2x1b21DQVlIbnl4SlA1WjRvV2Y4MElxMHhhY2FHdTJTeVBkdzc5R0lsUXowTjdlbnovWHBRckoxZXllOEN3PT0K",
+      "url": "https://github.com/dingcode-icu/tracer-inspector/releases/download/v0.0.2/tracer-inspector_x64.app.tar.gz.sig"
+    },
+    "darwin-x86_64": {
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVRYW1va2ViWDIrVjBocy8xRXVKV2VsYW05aEpvZDNGa3dVZXBPeURZV0pJTjVLUzIzRjZLdGVGekhYTUV2QnMwL2tnRmw3cndISEVyYmlidEtrbzMybDlicUh2QU5FUVFFPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNjgzNTM1ODQzCWZpbGU6dHJhY2VyLWluc3BlY3Rvci5hcHAudGFyLmd6ClFYOFNkdHBVV1l2aXBTVEZGVlp0WkQ1S2x1b21DQVlIbnl4SlA1WjRvV2Y4MElxMHhhY2FHdTJTeVBkdzc5R0lsUXowTjdlbnovWHBRckoxZXllOEN3PT0K",
+      "url": "https://github.com/dingcode-icu/tracer-inspector/releases/download/v0.0.2/tracer-inspector_x64.app.tar.gz.sig"
+    },
+    "linux-x86_64": {
+      "signature": "",
+      "url": ""
+    },
+    "windows-x86_64": {
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVRYW1va2ViWDIrVi9NOGFPU25MWHVoNDdWOWFjK3BkRE40YXRwd09KK0NFTlVPR0QwRWNXalI5U05sb0UwL0tCK0hpOW5zVWZTbmtPVUplaFVkc2lEZkQ2OERwWklGcVFJPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNjgzNTM1OTk5CWZpbGU6dHJhY2VyLWluc3BlY3Rvcl8wLjAuMF94NjRfZW4tVVMubXNpLnppcApWRUtoT0Vnd2h4R3BERnpWRGZrUlJrREhxeFlkNkd5T1MzejRNYUNra25sU0N2eDJwRTh5L1J4RUViVkxJSXhldFJCSlJFanFFSFBvZC9kdVkyVjBBZz09Cg==",
+      "url": "https://github.com/dingcode-icu/tracer-inspector/releases/download/v0.0.2/tracer-inspector_0.0.0_x64_en-US.msi.zip.sig"
+    }
+  }
+}
