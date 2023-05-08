@@ -1,57 +1,9 @@
 # Updater Log
 
-## v0.0.13
 
-* test ci \ 
-* base functional \
+## v0.0.1
 
-## v0.0.10
-
-* test ci \ 
-* base functional \
-
-
-## v0.0.9
-
-* test ci \ 
-* base functional \
-
-
-## v0.0.8
-
-* test ci \ 
-* base functional \
-
-
-## v0.0.7
-
-* test ci \ 
-* base functional \
-
-
-## v0.0.6
-
-* test ci \ 
-* base functional \
-
-## v0.0.5
-
-* test ci 
-* base functional
-
-
-## v0.0.4
-
-* test ci 
-* base functional
-
-
-## v0.0.3
-
-* test ci 
-* base functional
-
-## v0.0.2
-
-* test ci 
-* base functional
+[x]base nodetree watch\
+[x]base node-property watch\
+[x]asset in memory watch\
+[x]cmd execute from remote
